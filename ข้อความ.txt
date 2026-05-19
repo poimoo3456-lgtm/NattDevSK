@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="ระบบขอยืมอุปกรณ์กีฬาออนไลน์ โรงเรียนแสวงหาวิทยาคม">
+<meta name="theme-color" content="#0f172a">
+<title>Sawengha Wittayakhom Sports Equipment Borrowing System</title>
+
+<link rel="manifest" href="manifest.json">
+
+<style>
+/* =========================
+   RESET
+========================= */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Prompt",sans-serif;
+}
+
+:root{
+    --primary:#2563eb;
+    --secondary:#38bdf8;
+    --dark:#0f172a;
+    --light:#ffffff;
+    --glass:rgba(255,255,255,0.12);
+    --border:rgba(255,255,255,0.2);
+    --shadow:0 8px 30px rgba(0,0,0,.2);
+}
+
+body{
+    background:linear-gradient(135deg,#0f172a,#1e3a8a,#38bdf8);
+    min-height:100vh;
+    color:white;
+    overflow-x:hidden;
+}
+
+/* =========================
+   LOGIN
+========================= */
+.auth-container{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+}
+
+.glass-card{
+    width:100%;
+    max-width:420px;
+    background:var(--glass);
+    backdrop-filter:blur(20px);
+    border:1px solid var(--border);
+    border-radius:25px;
+    padding:30px;
+    box-shadow:var(--shadow);
+    animation:fadeIn 1s ease;
+}
+
+.logo{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.logo h1{
+    font-size:24px;
+    margin-top:10px;
+}
+
+.logo p{
+    opacity:.8;
+    font-size:14px;
+}
+
+.input-group{
+    margin-bottom:15px;
+}
+
+.input-group label{
+    display:block;
+    margin-bottom:6px;
+    font-size:14px;
+}
+
+.input-group input,
+.input-group select{
+    width:100%;
+    padding:14px;
+    border:none;
+    outline:none;
+    border-radius:12px;
+    background:rgba(255,255,255,.1);
+    color:white;
+}
+
+.input-group input::placeholder{
+    color:#ddd;
+}
+
+.btn{
+    width:100%;
+    border:none;
+    padding:14px;
+    border-radius:14px;
+    background:linear-gradient(135deg,var(--secondary),var(--primary));
+    color:white;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:bold;
+    transition:.3s;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+}
+
+.admin-btn{
+    margin-top:10px;
+    background:#111827;
+}
+
+/* =========================
+   DASHBOARD
+========================= */
+
+.app{
+    display:none;
+}
+
+.sidebar{
+    position:fixed;
+    width:260px;
+    height:100vh;
+    background:rgba(15,23,42,.9);
+    backdrop-filter:blur(20px);
+    padding:20px;
+    overflow-y:auto;
+}
+
+.sidebar h2{
+    margin-bottom:30px;
+    text-align:center;
+}
+
+.menu-item{
+    padding:14px;
+    border-radius:12px;
+    margin-bottom:10px;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.menu-item:hover,
+.menu-item.active{
+    background:rgba(255,255,255,.1);
+}
+
+.main{
+    margin-left:260px;
+    padding:25px;
+}
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:20px;
+    padding:20px;
+    backdrop-filter:blur(20px);
+}
+
+.card h3{
+    margin-bottom:10px;
+}
+
+.big-number{
+    font-size:34px;
+    font-weight:bold;
+}
+
+.equipment-grid{
+    margin-top:25px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+}
+
+.equipment-card{
+    background:rgba(255,255,255,.1);
+    border-radius:18px;
+    overflow:hidden;
+    transition:.3s;
+}
+
+.equipment-card:hover{
+    transform:translateY(-5px);
+}
+
+.equipment-image{
+    height:180px;
+    background-size:cover;
+    background-position:center;
+}
+
+.equipment-body{
+    padding:15px;
+}
+
+.status{
+    display:inline-block;
+    padding:6px 12px;
+    border-radius:30px;
+    font-size:12px;
+    margin-top:10px;
+}
+
+.available{
+    background:#16a34a;
+}
+
+.borrowed{
+    background:#dc2626;
+}
+
+.cart{
+    position:fixed;
+    right:20px;
+    bottom:20px;
+    background:linear-gradient(135deg,#0ea5e9,#2563eb);
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:28px;
+    cursor:pointer;
+    box-shadow:0 10px 25px rgba(0,0,0,.4);
+}
+
+.footer{
+    text-align:center;
+    padding:30px;
+    margin-top:40px;
+    font-size:14px;
+    opacity:.8;
+}
+
+/* =========================
+   TABLE
+========================= */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+    overflow:hidden;
+    border-radius:14px;
+}
+
+table th,
+table td{
+    padding:14px;
+    text-align:left;
+}
+
+table th{
+    background:rgba(255,255,255,.1);
+}
+
+table tr{
+    background:rgba(255,255,255,.05);
+}
+
+/* =========================
+   TOAST
+========================= */
+
+.toast{
+    position:fixed;
+    top:20px;
+    right:20px;
+    background:#16a34a;
+    color:white;
+    padding:15px 20px;
+    border-radius:12px;
+    display:none;
+    z-index:9999;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:900px){
+
+    .sidebar{
+        width:100%;
+        height:auto;
+        position:relative;
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .topbar{
+        flex-direction:column;
+        gap:15px;
+    }
+}
+
+/* =========================
+   ANIMATION
+========================= */
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+</style>
+</head>
+<body>
+
+<!-- =========================
+     LOGIN
+========================= -->
+
+<div class="auth-container" id="loginPage">
+
+    <div class="glass-card">
+
+        <div class="logo">
+            <h1>🏫 ระบบขอยืมอุปกรณ์กีฬา</h1>
+            <p>Sawengha Wittayakhom</p>
+        </div>
+
+        <div class="input-group">
+            <label>ชื่อ-นามสกุล</label>
+            <input type="text" id="studentName" placeholder="กรอกชื่อ-นามสกุล">
+        </div>
+
+        <div class="input-group">
+            <label>ระดับชั้น</label>
+            <select id="studentClass">
+                <option>ม.1</option>
+                <option>ม.2</option>
+                <option>ม.3</option>
+                <option>ม.4</option>
+                <option selected>ม.5</option>
+                <option>ม.6</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>ห้อง</label>
+            <input type="number" id="studentRoom" placeholder="เช่น 1">
+        </div>
+
+        <div class="input-group">
+            <label>เลขที่</label>
+            <input type="number" id="studentNo" placeholder="เช่น 11">
+        </div>
+
+        <button class="btn" onclick="loginStudent()">เข้าสู่ระบบ</button>
+
+        <button class="btn admin-btn" onclick="adminLogin()">เข้าสู่ระบบแอดมิน</button>
+
+    </div>
+
+</div>
+
+<!-- =========================
+     APP
+========================= -->
+
+<div class="app" id="app">
+
+    <div class="sidebar">
+
+        <h2>🏀 SW Sports</h2>
+
+        <div class="menu-item active">🏠 หน้าหลัก</div>
+        <div class="menu-item">🏀 อุปกรณ์กีฬา</div>
+        <div class="menu-item">🛒 ตะกร้ายืม</div>
+        <div class="menu-item">📦 ประวัติการยืม</div>
+        <div class="menu-item">🔁 คืนอุปกรณ์</div>
+        <div class="menu-item">👤 โปรไฟล์</div>
+        <div class="menu-item">🌙 Dark Mode</div>
+        <div class="menu-item" onclick="logout()">🚪 ออกจากระบบ</div>
+
+    </div>
+
+    <div class="main">
+
+        <div class="topbar">
+            <div>
+                <h1>Dashboard</h1>
+                <p>ระบบขอยืมอุปกรณ์กีฬาออนไลน์</p>
+            </div>
+
+            <div>
+                <input type="text" placeholder="ค้นหาอุปกรณ์..." style="padding:12px;border:none;border-radius:12px;">
+            </div>
+        </div>
+
+        <!-- Cards -->
+        <div class="cards">
+
+            <div class="card">
+                <h3>จำนวนอุปกรณ์ทั้งหมด</h3>
+                <div class="big-number">120</div>
+            </div>
+
+            <div class="card">
+                <h3>รายการที่ยืม</h3>
+                <div class="big-number">8</div>
+            </div>
+
+            <div class="card">
+                <h3>คืนล่าช้า</h3>
+                <div class="big-number">2</div>
+            </div>
+
+            <div class="card">
+                <h3>แจ้งเตือน</h3>
+                <div class="big-number">5</div>
+            </div>
+
+        </div>
+
+        <!-- Equipment -->
+        <h2 style="margin-top:30px;">🏀 อุปกรณ์กีฬา</h2>
+
+        <div class="equipment-grid" id="equipmentGrid"></div>
+
+        <!-- Borrow History -->
+        <h2 style="margin-top:40px;">📦 ประวัติการยืมล่าสุด</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>เลขรายการ</th>
+                    <th>อุปกรณ์</th>
+                    <th>วันที่</th>
+                    <th>สถานะ</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>BR-1001</td>
+                    <td>ฟุตบอล</td>
+                    <td>19/05/2026</td>
+                    <td>กำลังยืม</td>
+                </tr>
+
+                <tr>
+                    <td>BR-1002</td>
+                    <td>บาสเกตบอล</td>
+                    <td>18/05/2026</td>
+                    <td>คืนแล้ว</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Footer -->
+        <div class="footer">
+            “ระบบนี้ได้รับการพัฒนาและดูแลโดย บริษัท NattDev จำกัดมหาชน
+            จัดทำโดย นายณัฐวัตร ชูปรารมย์ ผู้ก่อตั้งและผู้พัฒนาโครงการ”
+        </div>
+
+    </div>
+
+    <!-- Cart -->
+    <div class="cart" onclick="openCart()">
+        🛒
+    </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- =========================
+     FIREBASE
+========================= -->
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+getFirestore,
+collection,
+addDoc,
+getDocs
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+window.db = db;
+window.collection = collection;
+window.addDoc = addDoc;
+window.getDocs = getDocs;
+
+</script>
+
+<!-- =========================
+     JAVASCRIPT
+========================= -->
+
+<script>
+
+const equipmentData = [
+
+{
+    name:"ฟุตบอล",
+    category:"กีฬา",
+    quantity:12,
+    status:"พร้อมใช้งาน",
+    image:"https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=1200"
+},
+
+{
+    name:"บาสเกตบอล",
+    category:"กีฬา",
+    quantity:8,
+    status:"พร้อมใช้งาน",
+    image:"https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1200"
+},
+
+{
+    name:"วอลเลย์บอล",
+    category:"กีฬา",
+    quantity:5,
+    status:"พร้อมใช้งาน",
+    image:"https://images.unsplash.com/photo-1592656094267-764a45160876?q=80&w=1200"
+},
+
+{
+    name:"แบดมินตัน",
+    category:"กีฬา",
+    quantity:15,
+    status:"พร้อมใช้งาน",
+    image:"https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?q=80&w=1200"
+},
+
+{
+    name:"ตะกร้อ",
+    category:"กีฬา",
+    quantity:4,
+    status:"ใกล้หมด",
+    image:"https://images.unsplash.com/photo-1521412644187-c49fa049e84d?q=80&w=1200"
+}
+
+];
+
+let cart = [];
+
+function renderEquipment(){
+
+    const grid = document.getElementById("equipmentGrid");
+
+    grid.innerHTML = "";
+
+    equipmentData.forEach((item,index)=>{
+
+        grid.innerHTML += `
+        
+        <div class="equipment-card">
+
+            <div class="equipment-image"
+            style="background-image:url('${item.image}')"></div>
+
+            <div class="equipment-body">
+
+                <h3>${item.name}</h3>
+
+                <p>หมวดหมู่: ${item.category}</p>
+                <p>คงเหลือ: ${item.quantity}</p>
+
+                <span class="status available">${item.status}</span>
+
+                <button class="btn"
+                style="margin-top:15px"
+                onclick="addToCart(${index})">
+                เพิ่มลงตะกร้า
+                </button>
+
+            </div>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+function addToCart(index){
+
+    cart.push(equipmentData[index]);
+
+    showToast("เพิ่มอุปกรณ์ลงตะกร้าแล้ว");
+
+}
+
+function openCart(){
+
+    alert(
+`🛒 จำนวนสินค้าในตะกร้า: ${cart.length}
+
+ระบบจะ:
+- สร้างเลขรายการอัตโนมัติ
+- ลดจำนวนอุปกรณ์อัตโนมัติ
+- เปลี่ยนสถานะเป็นรออนุมัติ`
+);
+
+}
+
+function showToast(message){
+
+    const toast = document.getElementById("toast");
+
+    toast.innerText = message;
+    toast.style.display = "block";
+
+    setTimeout(()=>{
+        toast.style.display = "none";
+    },3000);
+
+}
+
+function loginStudent(){
+
+    const name = document.getElementById("studentName").value;
+    const classroom = document.getElementById("studentClass").value;
+    const room = document.getElementById("studentRoom").value;
+    const no = document.getElementById("studentNo").value;
+
+    if(!name || !room || !no){
+
+        alert("กรุณากรอกข้อมูลให้ครบ");
+        return;
+
+    }
+
+    const studentData = {
+        name,
+        classroom,
+        room,
+        no
+    };
+
+    localStorage.setItem("studentSession",JSON.stringify(studentData));
+
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("app").style.display = "block";
+
+    showToast("เข้าสู่ระบบสำเร็จ");
+
+}
+
+function logout(){
+
+    localStorage.removeItem("studentSession");
+
+    location.reload();
+
+}
+
+function adminLogin(){
+
+    const pass = prompt("กรอกรหัสแอดมิน");
+
+    if(pass === "14150"){
+
+        alert("เข้าสู่ระบบแอดมินสำเร็จ");
+
+    }else{
+
+        alert("รหัสไม่ถูกต้อง");
+
+    }
+
+}
+
+window.onload = ()=>{
+
+    renderEquipment();
+
+    const session = localStorage.getItem("studentSession");
+
+    if(session){
+
+        document.getElementById("loginPage").style.display = "none";
+        document.getElementById("app").style.display = "block";
+
+    }
+
+};
+
+/* =========================
+   DARK MODE
+========================= */
+
+const darkBtn = document.querySelectorAll(".menu-item")[6];
+
+darkBtn.addEventListener("click",()=>{
+
+    document.body.classList.toggle("dark");
+
+    showToast("เปลี่ยนโหมดสำเร็จ");
+
+});
+
+/* =========================
+   QR CODE SYSTEM
+========================= */
+
+function generateQRCode(){
+
+    console.log("Generate QR");
+
+}
+
+function scanQRCode(){
+
+    console.log("Scan QR");
+
+}
+
+/* =========================
+   PWA INSTALL
+========================= */
+
+if ('serviceWorker' in navigator) {
+
+    window.addEventListener('load', () => {
+
+        navigator.serviceWorker.register('sw.js');
+
+    });
+
+}
+
+</script>
+
+</body>
+</html>
